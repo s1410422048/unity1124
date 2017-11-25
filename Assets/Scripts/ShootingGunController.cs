@@ -10,6 +10,14 @@ public class ShootingGunController : MonoBehaviour
     public ParticleSystem flareParticle;
     public LineRenderer gunFlare;
     public Transform gunEnd;
+    //--------------------------------------------------
+    public Transform cameraTransform;
+    public Reticle reticle;
+    public Transform gunContainer;
+    public float damping = 0.5f;
+    public float dampingCoef = -20f;
+    public float gunContainerSmooth = 10f;
+    //-------------------------------------------------
     public float defaultLineLength= 70f;
     public float gunFlareVisibleSeconds = 0.07f;
     private void OnEnable()
@@ -49,5 +57,13 @@ public class ShootingGunController : MonoBehaviour
             yield return null;
             timer += Time.deltaTime;
         }
+    }
+
+    private void Update()
+    {
+        transform.rotation = Quaternion.Slerp(transform.rotation, InputTracking.GetLocalRotation(VRNode.Head), damping * (1 - Mathf.Exp(dampingCoef * Time.deltaTime)));
+        transform.position = cameraTransform.position;
+        Quaternion lookAtRotation = Quaternion.LookRotation(reticle.ReticleTransform.position - gunContainer.position);
+        gunContainer.rotation = Quaternion.Slerp(gunContainer.rotation, lookAtRotation, gunContainerSmooth * Time.deltaTime);
     }
 }
